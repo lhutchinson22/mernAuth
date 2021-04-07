@@ -15,4 +15,16 @@ module.exports = {
       res.send("error saving: " + err);
     }
   },
+
+  getUserPosts: async (req, res) => {
+    console.log("hi");
+
+    try {
+      const allPosts = await Post.find({ authorId: req.user });
+      res.json(allPosts);
+    } catch (err) {
+      console.log("ERROR WAS CREATED", err);
+      res.send("cannot grab posts", err);
+    }
+  },
 };
