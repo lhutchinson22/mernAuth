@@ -76,6 +76,7 @@ module.exports = {
         user: {
           id: user._id,
           displayName: user.displayName,
+          confirmed: user.confirmed,
         },
       });
     } catch (err) {
@@ -84,10 +85,23 @@ module.exports = {
   },
 
   getUser: async (req, res) => {
-    const user = await User.findById(req.user);
-    res.json({
-      displayName: user.displayName,
-      id: user._id,
-    });
+    try {
+      const user = await User.findById(req.user);
+      res.json({
+        displayName: user.displayName,
+        id: user._id,
+      });
+    } catch (err) {
+      res.send(err.response);
+    }
+  },
+
+  deleteUser: async (req, res) => {
+    try {
+      const deletedUser = await User.findByIdAndDelete(req.user);
+      res.json(deletedUser);
+    } catch (err) {
+      res.send({ error: err });
+    }
   },
 };

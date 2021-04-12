@@ -17,8 +17,6 @@ module.exports = {
   },
 
   getUserPosts: async (req, res) => {
-    console.log("hi");
-
     try {
       const allPosts = await Post.find({ authorId: req.user });
       res.json(allPosts);
