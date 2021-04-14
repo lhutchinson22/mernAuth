@@ -2,6 +2,9 @@ require("dotenv").config();
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Confirm = require("../models/confirmModel");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 module.exports = {
   register: async (req, res) => {
@@ -38,8 +41,42 @@ module.exports = {
         displayName,
       });
 
-      const savedUser = await newUser.save();
+      // we start here
 
+      const confirmationToken = new Confirm({
+        token: crypto.randomBytes(10).toString("hex"),
+        authorId: newUser._id,
+      });
+
+      console.log(confirmationToken);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "authtestverify@gmail.com",
+          pass: process.env.EPASS,
+        },
+      });
+
+      const mailOptions = {
+        from: "authtestverify@gmail.com",
+        to: newUser.email,
+        subject: "Thanks for signing up!",
+        text: `Click to confirm http://localhost:3000/confirm_token/${confirmationToken.token}`,
+      };
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(
+            `Email was sent with: http://localhost:3000/confirm_token/${confirmationToken.token}!`
+          );
+        }
+      });
+
+      await confirmationToken.save();
+      const savedUser = await newUser.save();
       res.json(savedUser);
     } catch (err) {
       res.status(500).json({ msg: err });
